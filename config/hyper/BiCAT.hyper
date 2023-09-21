@@ -1,0 +1,6 @@
+MAX_ITEM_LIST_LENGTH choice [5, 20]
+train_batch_size choice [256, 512]
+num_prior choice [1, 2]
+pretrain_epoch choice [50, 100]
+lamb choice [0.3, 0.5]
+alpha choice [0.1, 0.08, 1.2]

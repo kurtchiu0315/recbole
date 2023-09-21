@@ -1,0 +1,17 @@
+# Environment Settings
+gpu_id: 0
+
+# Model Settings
+embedding_size: 64
+dropout_prob: 0.4
+reg_weight: 1.e-6
+nv: 8
+nh: 16
+loss_type: CE
+
+# Data settings
+MAX_ITEM_LIST_LENGTH: 5
+
+# Training Settings
+train_batch_size: 512
+neg_sampling: null

@@ -1,0 +1,5 @@
+n_heads choice [1, 2]
+hidden_dropout_prob choice [0.2, 0.5]
+attn_dropout_prob choice [0.2, 0.5]
+weight_decay choice [0.0, 1.e-6, 1.e-4]
+MAX_ITEM_LIST_LENGTH choice [50, 20, 10]

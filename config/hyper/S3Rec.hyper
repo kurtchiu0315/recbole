@@ -1,0 +1,5 @@
+hidden_dropout_prob choice [0.2, 0.5]
+attn_dropout_prob choice [0.2, 0.5]
+mask_ratio choice [0.1, 0.3, 0.4]
+mip_weight choice [0.1, 0.3, 0.4]
+pretrain_epochs choice [50, 100, 150]

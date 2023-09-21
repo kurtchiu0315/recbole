@@ -1,0 +1,6 @@
+hidden_dropout_prob choice [0.1, 0.2, 0.3, 0.4, 0.5]
+cl_lambda choice [0.1, 0.2, 0.3, 0.4]
+cl_lambda2 choice [0.1, 0.2, 0.3, 0.4]
+cutoff_rate choice [0.1, 0.2, 0.3, 0.4, 0.5]
+MAX_ITEM_LIST_LENGTH choice [10, 20, 30]
+train_batch_size choice [128, 512, 1024]

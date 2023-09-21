@@ -1,0 +1,48 @@
+# Environment Settings
+gpu_id: 0
+
+# Model Settings
+n_layers: 2
+n_heads: 2
+hidden_size: 64
+inner_size: 256
+hidden_dropout_prob: 0.5
+attn_dropout_prob: 0.5
+hidden_act: 'gelu'
+layer_norm_eps: 1e-12
+initializer_range: 0.02
+
+selected_features: ['class']
+num_hidden_layers_gru: 1
+enc: attcc # [att, meancc, attcc]
+loss_fuse_dropout_prob: 0.5
+pred_step: 2
+mil: 4
+mb_dropout_prob: 0.2
+mem: 64
+tau: 0.05
+
+pooling_mode: 'mean'
+
+loss_type: 'CE'
+loss_list: ['MILNCE']
+cl_lambda: 1
+
+
+# Data settings
+MAX_ITEM_LIST_LENGTH: 5
+
+# Training Settings
+train_batch_size: 512
+
+# 使用 BPR
+# neg_sampling:
+#     uniform: 1
+
+# 使用 CE
+neg_sampling: null
+
+
+
+
+

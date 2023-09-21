@@ -1,0 +1,4 @@
+hidden_dropout_prob choice [0.2, 0.5]
+attn_dropout_prob choice [0.2, 0.5]
+MAX_ITEM_LIST_LENGTH choice [5, 20]
+train_batch_size choice [256,512]

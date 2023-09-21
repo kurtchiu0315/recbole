@@ -1,0 +1,5 @@
+load_col:
+  inter: [user_id, item_id, rating, timestamp]
+  item: [item_id, name, url, picture_url] # for lastfm
+item_attribute: 'name' # for s3rec usage
+selected_features: ['name'] # for FDSA usage

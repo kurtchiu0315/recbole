@@ -1,0 +1,6 @@
+hidden_dropout_prob choice [0.5]
+attn_dropout_prob choice [0.2]
+cl_lambda choice [0.1, 0.3]
+MAX_ITEM_LIST_LENGTH choice [20, 50]
+train_batch_size choice [256, 512]
+aug_type1 choice ['random_all']

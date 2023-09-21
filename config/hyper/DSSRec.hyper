@@ -1,0 +1,4 @@
+MAX_ITEM_LIST_LENGTH choice [30, 15]
+train_batch_size choice [256, 512]
+num_intents choice [2, 4]
+pretrain_epoch choice [10, 20]

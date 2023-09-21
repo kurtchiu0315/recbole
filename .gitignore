@@ -1,0 +1,10 @@
+saved/**
+wandb/**
+dataset/**
+*.pyc
+*.pyo
+datasets.zip
+log/**
+log_tensorboard/**
+*.png
+*.txt

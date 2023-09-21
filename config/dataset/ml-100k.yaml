@@ -1,0 +1,5 @@
+load_col:
+  inter: [user_id, item_id, rating, timestamp]
+  item: [item_id, release_year, class] # for ml-100k
+item_attribute: 'class' # for s3rec usage
+selected_features: ['class'] # for FDSA usage

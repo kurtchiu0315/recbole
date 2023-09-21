@@ -1,0 +1,5 @@
+load_col:
+  inter: [user_id, item_id, rating, timestamp]
+  item: [item_id, movie_title, release_year, genre] # for ml-1m
+item_attribute: 'genre' # for s3rec usage
+selected_features: ['genre'] # for FDSA usage

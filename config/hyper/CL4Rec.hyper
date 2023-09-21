@@ -1,0 +1,7 @@
+cl_lambda choice [0.1, 0.2]
+MAX_ITEM_LIST_LENGTH choice [12, 20, 40]
+train_batch_size choice [256, 128]
+beta choice [0.2, 0.4]
+eta choice [0.6, 0.8]
+gamma choice [0.2, 0.4]
+aug_type1 choice ['random', 'crop', 'mask', 'reorder']

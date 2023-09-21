@@ -1,0 +1,4 @@
+pooling_type choice ['max', 'average']
+reg_weight choice '[0.00,0.00]','[0.001,0.00001]'
+MAX_ITEM_LIST_LENGTH choice [5, 10]
+train_batch_size choice [512, 1024, 4096]

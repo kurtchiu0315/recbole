@@ -1,0 +1,15 @@
+# Environment Settings
+gpu_id: 1
+
+# Model Settings
+embedding_size: 64
+pooling_type: average
+reg_weight: [0.0, 0.0]
+loss_type: CE
+
+# Data settings
+MAX_ITEM_LIST_LENGTH: 5
+
+# Training Settings
+train_batch_size: 4096
+neg_sampling: null

@@ -1,0 +1,6 @@
+load_col:
+  inter: [user_id, item_id, rating, timestamp]
+  item: [item_id, title, price, sales_type, sales_rank, brand, categories] # for amazon_toy & amazon_sport
+item_attribute: 'categories' # for s3rec usage
+selected_features: ['categories'] # for FDSA usage
+skip_common_class: 3
