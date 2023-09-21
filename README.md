@@ -11,6 +11,13 @@ Please download datasets from the following resources:
 1. [Rec Team Datasets](https://drive.google.com/drive/folders/1OjruXlZB2oKSv5SK58JSKAYALnRjUnMz?usp=sharing)
 2. [RUCAIBox/RecSysDatasets](https://github.com/RUCAIBox/RecSysDatasets)
 
+### Set wandb account
+1. modify `config/Default.yaml`
+```bash
+wandb_entity: $wandb_acc_name
+wandb_project: $wandb_project_name
+```
+
 ### Train
 1. Config file is stored at `config/model/{model}.yaml`.
 1. Please follow https://docs.wandb.ai/quickstart to setup wandb before training, and modify wandb related arguments in `config/Default.yaml`, including `wandb_project` and `wandb_entity`.
