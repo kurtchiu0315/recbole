@@ -30,3 +30,5 @@ from recbole.model.sequential_recommender.iclrec import ICLRec
 from recbole.model.sequential_recommender.srma import SRMA
 from recbole.model.sequential_recommender.hgn import HGN
 from recbole.model.sequential_recommender.contrarec import ContraRec
+from recbole.model.sequential_recommender.sasrecp import SASRecP
+from recbole.model.sequential_recommender.ecl import ECL

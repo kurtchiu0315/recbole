@@ -27,10 +27,11 @@ from recbole.model.layers import TransformerEncoder
 
 class BERT4Rec(SequentialRecommender):
 
-    def __init__(self, config, dataset):
+    def __init__(self, config, dataset, item_embedding=None):
         super(BERT4Rec, self).__init__(config, dataset)
 
         # load parameters info
+        self.device = config['device']
         self.n_layers = config['n_layers']
         self.n_heads = config['n_heads']
         self.hidden_size = config['hidden_size']  # same as embedding_size
@@ -50,7 +51,10 @@ class BERT4Rec(SequentialRecommender):
         self.mask_item_length = int(self.mask_ratio * self.max_seq_length)
 
         # define layers and loss
-        self.item_embedding = nn.Embedding(self.n_items + 1, self.hidden_size, padding_idx=0)  # mask token add 1
+        if item_embedding:
+            self.item_embedding = item_embedding
+        else:
+            self.item_embedding = nn.Embedding(self.n_items + 1, self.hidden_size, padding_idx=0)  # mask token add 1
         self.position_embedding = nn.Embedding(self.max_seq_length + 1, self.hidden_size)  # add mask_token at the last
         self.trm_encoder = TransformerEncoder(
             n_layers=self.n_layers,
@@ -131,8 +135,8 @@ class BERT4Rec(SequentialRecommender):
             index_ids = []
             for index_id, item in enumerate(instance):
                 # padding is 0, the sequence is end
-                if item == 0:
-                    break
+                if item == 0 or index_id == 0:
+                    continue
                 prob = random.random()
                 if prob < self.mask_ratio:
                     pos_item.append(item)
@@ -233,6 +237,42 @@ class BERT4Rec(SequentialRecommender):
             return loss
         else:
             raise NotImplementedError("Make sure 'loss_type' in ['BPR', 'CE']!")
+
+    def predictSeq(self, masked_item_seq, masked_index, pos_items):
+
+        seq_output = self.forward(masked_item_seq)
+        pred_index_map = self.multi_hot_embed(masked_index, masked_item_seq.size(-1))  # [B*mask_len max_len]
+        # [B mask_len] -> [B mask_len max_len] multi hot
+        pred_index_map = pred_index_map.view(masked_index.size(0), masked_index.size(1), -1)  # [B mask_len max_len]
+        # [B mask_len max_len] * [B max_len H] -> [B mask_len H]
+        # only calculate loss for masked position
+        seq_output = torch.bmm(pred_index_map, seq_output)  # [B mask_len H]
+
+        loss_fct = nn.CrossEntropyLoss(reduction='none')
+        test_item_emb = self.item_embedding.weight[:self.n_items]  # [item_num H]
+        logits = torch.matmul(seq_output, test_item_emb.transpose(0, 1))  # [B mask_len item_num]
+        targets = (masked_index > 0).float().view(-1)  # [B*mask_len]
+
+        loss = torch.sum(loss_fct(logits.view(-1, test_item_emb.size(0)), pos_items.view(-1)) * targets) \
+               / torch.sum(targets)
+
+        mask_len = seq_output.size(1)
+        seq_output_f = seq_output.reshape(-1, self.hidden_size)
+
+
+        test_item_emb = self.item_embedding.weight[:-1]
+        # scores = torch.mul(seq_output_f, test_item_emb).sum(dim=1)  # [B]
+        scores = torch.matmul(seq_output_f, test_item_emb.transpose(0, 1))  # [B n_items]
+
+
+        scored_item = torch.argmax(scores, dim=1)
+        scored_item = scored_item.reshape(-1, mask_len)
+
+        masked_index += (masked_index > 0).long().to(self.device)
+        padd = torch.zeros((masked_item_seq.size(0), 1)).to(self.device)
+        masked_item_seq = torch.cat((padd, masked_item_seq), dim=1).long()
+        new_seq = masked_item_seq.scatter(-1, masked_index, scored_item)[:, 1:]
+        return new_seq, loss
 
     def predict(self, interaction):
         item_seq = interaction[self.ITEM_SEQ]
