@@ -157,6 +157,7 @@ def get_dataloader(config, phase):
         'EC4SRec': _get_CL_dataloader,
         'DADACLRec': _get_CL_dataloader,
         'DNDCLRec': _get_CL_dataloader,
+        'MCLRec': _get_CL_dataloader,
     }
     if config['model'] in register_table:
         return register_table[config['model']](config, phase)
@@ -205,6 +206,8 @@ def _get_CL_dataloader(config, phase):
             return EC4SRecTrainDataLoader
         elif config['model'] in ['DADACLRec', 'DNDCLRec']:
             return DADACLRecTrainDataLoader
+        elif config['model'] == 'MCLRec':
+            return MCLRecTrainDataLoader
         return CLTrainDataLoader
     else:
         eval_strategy = config['eval_neg_sample_args']['strategy']
