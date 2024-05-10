@@ -8,7 +8,7 @@ from recbole.utils import early_stopping,  dict2str, set_color, get_gpu_usage
 from recbole.data.interaction import Interaction
 from recbole.model.sequential_recommender.dadaclrec import PolicyChooser as  DADA_PolicyChooser
 from recbole.model.sequential_recommender.dndclrec import PolicyChooser as DND_PolicyChooser
-
+from recbole.model.extractors import Extractor
 
 
 class CoSeRecTrainer(Trainer):
