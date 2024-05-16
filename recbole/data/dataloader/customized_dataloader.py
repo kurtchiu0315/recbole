@@ -944,7 +944,7 @@ class EC4SRecTrainDataLoader(CLTrainDataLoader):
             else:
                 keep_index = useful_score.topk(new_seq_length, largest=True, sorted=False).indices.sort().values
 
-            new_seq = seq[keep_index]
+            new_seq = seq[keep_index.cpu()]
 
             new_seq = torch.cat([new_seq, torch.zeros_like(seq)]) [ :seq.shape[0]]
             return new_seq, new_seq_length
@@ -958,7 +958,7 @@ class EC4SRecTrainDataLoader(CLTrainDataLoader):
             else:
                 mask_index = useful_score.topk(num_mask, largest=False, sorted=False).indices
         
-            seq[mask_index] = self.dataset.item_num  # token 0 has been used for semantic masking
+            seq[mask_index.cpu()] = self.dataset.item_num  # token 0 has been used for semantic masking
             return seq, length
         
         def reorder(seq, length, seq_importance_score):
@@ -971,7 +971,7 @@ class EC4SRecTrainDataLoader(CLTrainDataLoader):
             
             reorder_index = less_importance_index[torch.randperm(num_reorder)]
 
-            seq[reorder_index] = seq[less_importance_index]
+            seq[reorder_index.cpu()] = seq[less_importance_index.cpu()]
             return seq, length
         
         retrieval = self._retrieval_data_selection
