@@ -16,17 +16,28 @@ from recbole.trainer import HyperTuning
 from recbole.quick_start import objective_function
 
 
-def main(args):
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config_files', type=str, default=None, help='fixed config files')
+    parser.add_argument('--params_file', type=str, default=None, help='parameters file')
+    args, _ = parser.parse_known_args()
+    
+    try:
+        model = [arg.split('=')[1] for arg in sys.argv if '--model=' in arg][0]
+        dataset = [arg.split('=')[1] for arg in sys.argv if '--dataset=' in arg][0]
+    except:
+        raise NotImplementedError('Make sure model and dataset follow the format(--{k}={v}) in command line.')
+    
     # plz set algo='exhaustive' to use exhaustive search, in this case, max_evals is auto set
     config_file_list = args.config_files.strip().split(' ') if args.config_files \
-                            else [os.path.join('config', 'model', f'{args.model}.yaml')]
+                            else [os.path.join('config', 'model', f'{model}.yaml')]
     config_file_list.append(os.path.join('config', 'Default.yaml'))
-    if os.path.exists(os.path.join('config', 'dataset', f'{args.dataset}.yaml')):
-        config_file_list.append(os.path.join('config', 'dataset', f'{args.dataset}.yaml'))
+    if os.path.exists(os.path.join('config', 'dataset', f'{dataset}.yaml')):
+        config_file_list.append(os.path.join('config', 'dataset', f'{dataset}.yaml'))
 
     params_file = args.params_file if args.params_file \
-                        else os.path.join('config', 'hyper', f'{args.model}.hyper')
-    export_result_file = os.path.join('saved', f'{args.model}-{args.dataset}.hyper.result')
+                        else os.path.join('config', 'hyper', f'{model}.hyper')
+    export_result_file = os.path.join('saved', f'{model}-{dataset}.hyper.result')
     hp = HyperTuning(objective_function, algo='exhaustive',
                      params_file=params_file, fixed_config_file_list=config_file_list)
     hp.run()
@@ -38,12 +49,4 @@ def main(args):
 
 if __name__ == '__main__':
     torch.set_num_threads(16)
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--model', '-m', type=str, default='', help='name of models')
-    parser.add_argument('--dataset', '-d', type=str, default='', help='name of datasets')
-    parser.add_argument('--config_files', type=str, default=None, help='fixed config files')
-    parser.add_argument('--params_file', type=str, default=None, help='parameters file')
-    args, _ = parser.parse_known_args()
-    
-    main(args)
+    main()
