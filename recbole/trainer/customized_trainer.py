@@ -8,7 +8,7 @@ from recbole.utils import early_stopping,  dict2str, set_color, get_gpu_usage
 from recbole.data.interaction import Interaction
 from recbole.model.sequential_recommender.dadaclrec import PolicyChooser as  DADA_PolicyChooser
 from recbole.model.sequential_recommender.dndclrec import PolicyChooser as DND_PolicyChooser
-
+from recbole.model.extractors import Extractor
 
 
 class CoSeRecTrainer(Trainer):
@@ -762,3 +762,125 @@ class DNDCLRecTrainer(Trainer):
                     break
         self._add_hparam_to_tensorboard(self.best_valid_score)
         return self.best_valid_score, self.best_valid_result
+
+class MCLRecTrainer(Trainer):
+    r"""RecVAETrainer is designed for MCLRec, which is a sequential recommender.
+
+    """
+
+    def __init__(self, config, model):
+        super(MCLRecTrainer, self).__init__(config, model)
+        self.joint=config['joint']
+        # Extractor
+        self.aug_1 = Extractor([64, 32,16,64], "gelu", None).to(self.device)
+        self.aug_2 = Extractor([64, 32,16,64], "gelu", None).to(self.device)
+        # optimize two different extractors
+        self.optimizer_1 = self._build_optimizer([{"params": self.aug_1.parameters()}, {"params": self.aug_2.parameters()}])
+        # joint-learing
+        self.optimizer_2 = self._build_optimizer([{"params": self.model.parameters()},{"params": self.aug_1.parameters()}, {"params": self.aug_2.parameters()}])
+
+
+    def _train_epoch(self, train_data, epoch_idx, loss_func=None, show_progress=False):
+        r"""Train the model in an epoch
+
+        Args:
+            train_data (DataLoader): The train data.
+            epoch_idx (int): The current epoch id.
+            loss_func (function): The loss function of :attr:`model`. If it is ``None``, the loss function will be
+                :attr:`self.model.calculate_loss`. Defaults to ``None``.
+            show_progress (bool): Show the progress of training epoch. Defaults to ``False``.
+
+        Returns:
+            float/tuple: The sum of loss returned by all batches in this epoch. If the loss in each batch contains
+            multiple parts and the model return these multiple parts loss instead of the sum of loss, it will return a
+            tuple which includes the sum of loss in each part.
+        """
+        self.model.train()
+        loss_func = loss_func or self.model.calculate_loss
+        total_loss = None
+        iter_data = (
+            tqdm(
+                enumerate(train_data),
+                total=len(train_data),
+                desc=set_color(f"Train {epoch_idx:>5}", 'pink'),
+            ) if show_progress else enumerate(train_data)
+        )
+        for batch_idx, interaction in iter_data:
+            interaction = interaction.to(self.device)
+            if self.joint==1:
+                self.optimizer_2.zero_grad()
+                losses = loss_func(interaction,[self.aug_1, self.aug_2])
+                if isinstance(losses, tuple):
+                    loss = sum(losses)
+                    loss_tuple = tuple(per_loss.item() for per_loss in losses)
+                    total_loss = loss_tuple if total_loss is None else tuple(map(sum, zip(total_loss, loss_tuple)))
+                else:
+                    loss = losses
+                    total_loss = losses.item() if total_loss is None else total_loss + losses.item()
+                self._check_nan(loss)
+                loss.backward()
+                if self.clip_grad_norm:
+                    clip_grad_norm_(self.model.parameters(), **self.clip_grad_norm)
+                self.optimizer_2.step()
+            else:
+                # step 1, update the parameters of the encoder
+                self.optimizer.zero_grad()
+                for param in self.aug_1.parameters():
+                    param.requires_grad = False
+                for param in self.aug_2.parameters():
+                    param.requires_grad = False
+                losses = loss_func(interaction, [self.aug_1, self.aug_2], "step1")
+                if isinstance(losses, tuple):
+                    loss = sum(losses)
+                    loss_tuple = tuple(per_loss.item() for per_loss in losses)
+                    total_loss = loss_tuple if total_loss is None else tuple(map(sum, zip(total_loss, loss_tuple)))
+                else:
+                    loss = losses
+                    total_loss = losses.item() if total_loss is None else total_loss + losses.item()
+                self._check_nan(loss)
+                loss.backward()
+                if self.clip_grad_norm:
+                    clip_grad_norm_(self.model.parameters(), **self.clip_grad_norm)
+                self.optimizer.step()
+
+                # step 2，update the parameters of two learnable extractors
+                self.optimizer_1.zero_grad()
+                for param in self.aug_1.parameters():
+                    param.requires_grad = True
+                for param in self.aug_2.parameters():
+                    param.requires_grad = True
+                losses = loss_func(interaction, [self.aug_1, self.aug_2], "step2")
+                if isinstance(losses, tuple):
+                    loss = sum(losses)
+                    loss_tuple = tuple(per_loss.item() for per_loss in losses)
+                    total_loss = loss_tuple if total_loss is None else tuple(map(sum, zip(total_loss, loss_tuple)))
+                else:
+                    loss = losses
+                    total_loss = losses.item() if total_loss is None else total_loss + losses.item()
+                self._check_nan(loss)
+                loss.backward()
+                if self.clip_grad_norm:
+                    clip_grad_norm_(self.model.parameters(), **self.clip_grad_norm)
+                self.optimizer_1.step()
+
+                # step 3， update the parameters of the encoder
+                self.optimizer.zero_grad()
+                for param in self.aug_1.parameters():
+                    param.requires_grad = False
+                for param in self.aug_2.parameters():
+                    param.requires_grad = False
+                losses = loss_func(interaction, [self.aug_1, self.aug_2], "step3")
+                if isinstance(losses, tuple):
+                    loss = sum(losses)
+                    loss_tuple = tuple(per_loss.item() for per_loss in losses)
+                    total_loss = loss_tuple if total_loss is None else tuple(map(sum, zip(total_loss, loss_tuple)))
+                else:
+                    loss = losses
+                    total_loss = losses.item() if total_loss is None else total_loss + losses.item()
+                self._check_nan(loss)
+                loss.backward()
+                if self.clip_grad_norm:
+                    clip_grad_norm_(self.model.parameters(), **self.clip_grad_norm)
+                self.optimizer.step()
+
+        return total_loss

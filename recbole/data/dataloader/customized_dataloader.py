@@ -1193,3 +1193,19 @@ class DADACLRecTrainDataLoader(CL4RecTrainDataLoader):
         
         self.dataset.inter_feat.interaction["reverse_seqs"] =  new_reverse_seqs
 
+class MCLRecTrainDataLoader(CL4RecTrainDataLoader):
+
+    def __init__(self, config, dataset, sampler, shuffle=False):
+
+        super().__init__(config, dataset, sampler, shuffle=shuffle)
+
+    def _contrastive_learning_augmentation(self, cur_data):
+
+        # cur_data = self._neg_sampling(cur_data)
+        sequences = cur_data[self.iid_list_field]
+        lengths = cur_data[self.item_list_length_field]
+        aug_seq1, aug_len1 = self._augmentation(sequences, lengths, aug_type=self.aug_type1)
+        aug_seq2, aug_len2 = self._augmentation(sequences, lengths, aug_type=self.aug_type2)
+        cur_data.update(Interaction({'aug1': aug_seq1, 'aug_len1': aug_len1,
+                                     'aug2': aug_seq2, 'aug_len2': aug_len2}))
+        return cur_data
