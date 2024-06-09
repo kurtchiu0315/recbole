@@ -48,9 +48,18 @@ def run_recbole(model=None, dataset=None, config_file_list=None, config_dict=Non
 
     
     # dataset splitting
-    train_data, valid_data, test_data = data_preparation(config, dataset)
-    if config['save_dataloaders']:
-        save_split_dataloaders(config, dataloaders=(train_data, valid_data, test_data))
+    if config["load_split_dataloaders"]:
+        train_data, valid_data, test_data = load_split_dataloaders(config["load_split_dataloaders"])
+    elif (
+        f'{config["dataset"]}-for-{config["model"]}-dataloader.pth' in os.listdir(config['checkpoint_dir'])
+    ):
+        train_data, valid_data, test_data = load_split_dataloaders(
+            os.path.join(config['checkpoint_dir'],  f'{config["dataset"]}-for-{config["model"]}-dataloader.pth')
+        )
+    else:
+        train_data, valid_data, test_data = data_preparation(config, dataset)
+        if config['save_dataloaders']:
+            save_split_dataloaders(config, dataloaders=(train_data, valid_data, test_data))
 
     # model loading and initialization
     model = get_model(config['model'])(config, train_data.dataset).to(config['device'])

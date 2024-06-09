@@ -26,7 +26,7 @@ gamma: 0.2   # mask
 beta: 0.2   # reorder
 start_ecl_epoch: 3
 hard_sample: false
-stopping_step: 20
+stopping_step: 15
 epochs: 200
 update_freq: 10
 

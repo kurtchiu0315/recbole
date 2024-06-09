@@ -297,9 +297,6 @@ class ECL(SequentialRecommender):
             logits = torch.matmul(seq_emb, test_item_emb.transpose(0, 1))
             encode_loss = self.loss_fct(logits, pos_items)
 
-
-
-
         discrim_loss = torch.tensor(0)
         # by current step
         if self.discrim_loss_weight != 0:
@@ -315,7 +312,12 @@ class ECL(SequentialRecommender):
             seq_output_1 = self.encoder.forward(item_seq, item_seq_len)
             con_loss = self.calculate_con_loss(seq_output, seq_output_1)
 
-        return self.encode_loss_weight * encode_loss, self.con_loss_weight * con_loss, self.discrim_loss_weight * discrim_loss, self.generate_loss_weight * generate_loss
+        return (
+            self.encode_loss_weight * encode_loss, 
+            self.con_loss_weight * con_loss, 
+            self.discrim_loss_weight * discrim_loss, 
+            self.generate_loss_weight * generate_loss
+        )
 
     def predict(self, interaction):
         item_seq = interaction[self.ITEM_SEQ]

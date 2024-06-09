@@ -1,0 +1,7 @@
+MAX_ITEM_LIST_LENGTH choice [8, 16]
+train_batch_size choice [256, 512]
+contrastive_loss_weight choice [0.2, 0.5]
+discriminator_loss_weight choice [1, 0.8]
+generate_loss_weight choice  [0.2, 0.5]
+generator_path choice ['saved/BERT4Rec-lastfm-May-12-2024_16-33-03.pth', ' saved/DuoRec-lastfm-May-12-2024_16-32-22.pth']
+wandb_project choice ['newdada']

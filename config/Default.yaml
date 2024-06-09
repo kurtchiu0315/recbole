@@ -1,5 +1,5 @@
 # Wandb Settings
-wandb_entity: samuelhsu
+wandb_entity: kurtchiu
 wandb_project: recbole
 
 # Environment Settings

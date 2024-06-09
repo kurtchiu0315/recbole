@@ -19,7 +19,7 @@ from recbole.quick_start import objective_function
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--config_files', type=str, default=None, help='fixed config files')
-    parser.add_argument('--params_file', type=str, default=None, help='parameters file')
+    parser.add_argument('--params_file', '-p', type=str, default=None, help='parameters file')
     args, _ = parser.parse_known_args()
     
     try:

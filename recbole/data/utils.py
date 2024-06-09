@@ -98,15 +98,15 @@ def data_preparation(config, dataset, save=False):
     model_type = config['MODEL_TYPE']
     built_datasets = dataset.build()
     logger = getLogger()
-
+    shuffle = config['shuffle']
     train_dataset, valid_dataset, test_dataset = built_datasets
     train_sampler, valid_sampler, test_sampler = create_samplers(config, dataset, built_datasets)
 
     if model_type != ModelType.KNOWLEDGE:
-        train_data = get_dataloader(config, 'train')(config, train_dataset, train_sampler, shuffle=True)
+        train_data = get_dataloader(config, 'train')(config, train_dataset, train_sampler, shuffle=shuffle)
     else:
         kg_sampler = KGSampler(dataset, config['train_neg_sample_args']['distribution'])
-        train_data = get_dataloader(config, 'train')(config, train_dataset, train_sampler, kg_sampler, shuffle=True)
+        train_data = get_dataloader(config, 'train')(config, train_dataset, train_sampler, kg_sampler, shuffle=shuffle)
 
     valid_data = get_dataloader(config, 'evaluation')(config, valid_dataset, valid_sampler, shuffle=False)
     test_data = get_dataloader(config, 'evaluation')(config, test_dataset, test_sampler, shuffle=False)
